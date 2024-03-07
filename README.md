@@ -48,7 +48,4 @@ To verify your server, use tools like `nc` and test various scenarios, including
 ## Bonus Part
 Enhance your IRC server with additional features if the mandatory part is perfect. Bonus features include handling file transfers and implementing a bot.
 
-## Submission and Peer-Evaluation
-Submit the required files, ensuring the mandatory part is perfect for the bonus part to be evaluated. Peer evaluation will be based on the correctness and functionality of your IRC server.
 
-Feel free to explore additional features to make your IRC server even more robust and user-friendly. Good luck with your implementation!
