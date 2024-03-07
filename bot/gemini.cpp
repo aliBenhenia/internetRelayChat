@@ -7,7 +7,7 @@ inline double	stime(long past, long present) {
 	return hours;
 }
 
-Bot::Bot( void ) {
+Bot::Bot( int port, std::string password ) {
 	sockaddr_in	geminiAddr;
 	int			enableOpt = true;
 
@@ -15,7 +15,7 @@ Bot::Bot( void ) {
 	if (this->geminiSocket == error)
 		throw std::runtime_error("Error creating socket for gemini client");
 	geminiAddr.sin_family = AF_INET;
-	geminiAddr.sin_port = htons(6667);
+	geminiAddr.sin_port = htons(port);
 	if (inet_pton(AF_INET, "127.0.0.1", &geminiAddr.sin_addr) <= 0)
 		throw std::runtime_error("Error converting gemini server address");
 	if (connect(this->geminiSocket, reinterpret_cast<sockaddr*>(&geminiAddr), sizeof(geminiAddr)) == error)
@@ -26,7 +26,7 @@ Bot::Bot( void ) {
 	throw std::runtime_error("Set socket option [level: SOL_SOCKET] [option: TCP_NODELAY] failed :" + to_string(strerror(errno)));
 	if (fcntl(this->geminiSocket, F_SETFL, O_NONBLOCK) == error)
 		throw std::runtime_error("Error setting gemini socket to non-blocking mode");
-	std::string	message = "PASS lol\r\n";
+	std::string	message = "PASS " + password + "\r\n";
 	psend(this->geminiSocket, message.c_str(), message.size(), 0);
 	message = "NICK gemini\r\n";
 	psend(this->geminiSocket, message.c_str(), message.size(), 0);

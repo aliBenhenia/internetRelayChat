@@ -12,6 +12,7 @@ void Server:: quiteCmd(int clientSocket, Client _client)
 		{
 			(*it)->removeClient(nickName);
 			(*it)->removeOperator(nickName);
+			(*it)->removeInvited(nickName);
 			if ((*it)->hasNoClient() == false) {
 				delete *it;
 				channels->erase(it);

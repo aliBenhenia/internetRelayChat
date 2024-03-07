@@ -20,7 +20,7 @@ typedef int SOCKET;
 
 class Bot {
 	public:
-		Bot( void );
+		Bot( int port, std::string password );
 		~Bot();
 
 		// Methods

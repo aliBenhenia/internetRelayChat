@@ -64,12 +64,15 @@ class Server {
 		std::vector<Client*>* 	clients;
 		std::vector<Channel*>* 	channels;
 		std::map<SOCKET, std::string>	commandsList;
+		std::map<SOCKET, std::string>	ipAddresses;
 };
 
 void	sendWelcomeMessage(uint16_t clientSocket, int clientIp, const std::string& username, const std::string& nickName);
 std::pair<bool, std::string>	DuplicateCommandDetector(std::vector<std::string> rawData);
 void	sendErrorMessage( int socket, int error_code, std::string nickname, std::string message );
+void	sendErrorMessageWithoutClosingConnection( int socket, int error_code, std::string nickname, std::string message );
 void	sendErrorMessage( int socket, std::string message );
+void	sendErrorMessageWithoutClosingConnection( int socket, std::string message );
 int	getSocket( std::string& req );
 
 #endif

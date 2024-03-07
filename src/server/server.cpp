@@ -66,7 +66,7 @@ void	Server::start( void ) {
 			count = 0;
 			this->checkClientConnections();
 		}
-		clientsReadyToServer = poll(this->fds.getFds(), this->fds.size(), 20);
+		clientsReadyToServer = poll(this->fds.getFds(), this->fds.size(), 30);
 		if (clientsReadyToServer == error)
 			throw std::runtime_error("error: fatal\nPoll in IRC failed with status: " + to_string(strerror(errno)));
 		if (clientsReadyToServer == 0)
@@ -107,26 +107,26 @@ void	Server::start( void ) {
 				if (req.empty())
 					continue ;
 
-				// std::cout << Blue << "Received: " << req << Clear << std::endl ;
-
 				std::vector<std::string>	commands;
 				std::vector<std::string>	tmp;
 
 				if (this->commandsList[clientId].size())
 					commands.push_back(this->commandsList[clientId]);
 
-				if (req[req.size() - 1] != '\n') {
+				if (req.find('\r') == std::string::npos || req.find('\n') == std::string::npos) {
 					this->commandsList[clientId] += req;
 					continue ;
 				} else {
-					tmp = split(req, "\n");
+					tmp = split(req, "\r\n");
 					if (tmp.size()) {
-						if (commands.size() && commands.back().find('\n') == std::string::npos) {
-							commands.back() += tmp[0];
+						if (commands.size()) {
+							commands.back() += tmp[0].erase(tmp[0].find_last_not_of(' '), std::string::npos);
 							tmp.erase(tmp.begin());
 						}
-						for (std::vector<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); it++)
-							commands.push_back(*it);
+						for (std::vector<std::string>::const_iterator it = tmp.begin(); it != tmp.end(); it++) {
+							size_t	lastNoseSpacePos = (*it).find_last_not_of(' ');
+							commands.push_back((*it).substr(0, lastNoseSpacePos == std::string::npos ? 0 : lastNoseSpacePos == (*it).size() ? lastNoseSpacePos : lastNoseSpacePos + 1));
+						}
 					}
 					this->commandsList[clientId].clear();
 				}
@@ -145,11 +145,6 @@ void	Server::start( void ) {
 							continue ;
 						} catch (const std::exception& e) {
 							std::cerr << Red << e.what() << Clear << std::endl ;
-							try { this->quiteCmd(clientId, this->getClient(clientId)); }
-							catch(const std::exception& e) {
-								std::cerr << "??2-> " <<  e.what() << '\n';
-								this->removeClient(clientId);
-							}
 							commands.clear();
 							break ;
 						}
@@ -214,6 +209,7 @@ std::pair<SOCKET, IP>	Server::acceptClient( void ) {
 		std::cout << Green << "Client connection accepted with [SD: " << clientSocket << "] [host: " << host << "] [port: " << ntohs(clientAddr.sin_port) << "]" << Clear << std::endl ;
 	this->fds.push_back(clientSocket);
 	this->commandsList[clientSocket] = "";
+	this->ipAddresses[clientSocket] = host;
 	return std::make_pair(clientSocket, clientAddr.sin_addr.s_addr);
 }
 
@@ -221,14 +217,16 @@ void	Server::registerClient( SOCKET socket, IP ip, std::string req ) {
 	std::string	command = req.substr(0, req.find(' '));
 
 	try {
-		if (command == "PASS")
+		if (command == "PONG")
+			return ;
+		else if (command == "PASS")
 			this->authPass(socket, req);
 		else if (command == "NICK")
 			this->authNick(socket, req);
 		else if (command == "USER")
 			this->authUser(socket, ip, req);
 		else {
-			sendErrorMessage(socket, ERR_UNKNOWNCOMMAND, NICK_NA, command + " unknown command");
+			sendErrorMessageWithoutClosingConnection(socket, ERR_UNKNOWNCOMMAND, NICK_NA, command + " unknown command, please register first to have access to server resources");
 			throw std::runtime_error("unknown command");
 		}
 	} catch (const std::exception& e) { throw std::runtime_error(e.what()); }
@@ -239,6 +237,7 @@ void	Server::removeClient(int socket) {
 
 	this->fds.erase(socket);
 	this->commandsList.erase(socket);
+	this->ipAddresses.erase(socket);
 	if (socket == this->geminiSocket)
 		this->geminiSocket = NONE;
 	it = this->clients->begin();

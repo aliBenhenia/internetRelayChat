@@ -104,3 +104,17 @@ std::string Channel::getMembers() const
 	}
 	return res;
 }
+
+void Channel:: removeInvited(NAME nickname)
+{
+	std::vector<Client>::iterator it = this->invited.begin();
+	while (it != this->invited.end())
+	{
+		if (it->getNickname() == nickname)
+		{
+			this->invited.erase(it);
+			return;
+		}
+		it++;
+	}
+}

@@ -1,6 +1,4 @@
 #include "server.hpp"
-#include <thread>
-#include <chrono>
 
 Server*	serverInstance = NULL;
 
@@ -9,10 +7,6 @@ void	handleSignal(int signal) {
 	if (serverInstance != NULL) {
 		delete serverInstance;
 	}
-	// for (int i = 0; i < 2; i++) {
-	// 	std::cout << "Exiting in " << 2 - i << " seconds" << std::endl;
-	// 	std::this_thread::sleep_for(std::chrono::seconds(1));
-	// }
 	exit(EXIT_SUCCESS);
 }
 
@@ -24,10 +18,11 @@ int main(int ac, char** av) {
 		return EXIT_FAILURE;
 	}
 
-	int port = std::atoi(av[1]);
+	char* end;
+	long port = strtol(av[1], &end, 10);
 
-	if (port == error) {
-		std::cerr << "ERROR :Invalid port number" << std::endl;
+	if (*end != '\0' || port < 1024 || port > 65535) {
+		std::cerr << "Invalid port number" << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -36,7 +31,7 @@ int main(int ac, char** av) {
 
 	// Starting IRC server
 	try {
-		serverInstance = new Server(anyhost, port, to_string(av[2]));
+		serverInstance = new Server(anyhost, static_cast<int>(port), to_string(av[2]));
 		serverInstance->start();
 	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl ;

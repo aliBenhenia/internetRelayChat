@@ -30,14 +30,26 @@ void	sendErrorMessage( int socket, int error_code, std::string nickname, std::st
 	std::string	errorMsg = ":ft_irc " + to_string(error_code) + " " + nickname + " :" + message + "\r\n";
 	psend(socket, errorMsg.c_str(), errorMsg.size(), 0);
 	close(socket);
-	std::cout << errorMsg << std::endl ;
+	std::cerr << errorMsg << std::endl ;
+}
+
+void	sendErrorMessageWithoutClosingConnection( int socket, int error_code, std::string nickname, std::string message ) {
+	std::string	errorMsg = ":ft_irc " + to_string(error_code) + " " + nickname + " :" + message + "\r\n";
+	psend(socket, errorMsg.c_str(), errorMsg.size(), 0);
+	std::cerr << errorMsg << std::endl ;
 }
 
 void	sendErrorMessage( int socket, std::string message ) {
 	std::string	errorMsg = "ERROR :" + message + "\r\n";
 	psend(socket, errorMsg.c_str(), errorMsg.size(), 0);
 	close(socket);
-	std::cout << errorMsg << std::endl ;
+	std::cerr << errorMsg << std::endl ;
+}
+
+void	sendErrorMessageWithoutClosingConnection( int socket, std::string message ) {
+	std::string	errorMsg = "ERROR :" + message + "\r\n";
+	psend(socket, errorMsg.c_str(), errorMsg.size(), 0);
+	std::cerr << errorMsg << std::endl ;
 }
 
 Channel*	Server::findChannel( const std::string& channelName ) {

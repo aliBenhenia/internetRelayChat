@@ -1,6 +1,6 @@
 NAME= ircserv
 BNAME= gemini
-FLAGS= -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
+FLAGS= -Wall -Wextra -Werror -std=c++98
 CC= c++
 RM= rm -f
 PORT=6667
@@ -46,9 +46,5 @@ run: all
 b_run: bonus
 	clear
 	./$(BNAME) $(PORT) $(PASS)
-
-lrun: all
-	clear
-	lldb ./$(NAME) $(PORT) $(PASS)
 
 .PHONY: all clean fclean re run bonus

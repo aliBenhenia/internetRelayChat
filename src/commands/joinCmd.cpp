@@ -41,7 +41,7 @@ void Server::joinChannel(std::string channelName, std::string key, int clientSoc
 				}
 				channel_->addClient(_client);
 				_client.addChannel(*channel_);
-				res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + "127.0.0.1"+ " JOIN " + channelName + "\r\n";
+				res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + this->ipAddresses.at(clientSocket) + " JOIN " + channelName + "\r\n";
 				channel_->broadcastToMembers(res, -1);
 				res = ":" + _client.getNickname() + " 353 " + _client.getNickname() + " = " + channelName + " :" + channel_->getMembers() + "\r\n";
 				channel_->broadcastToMembers(res, -1);
@@ -74,7 +74,7 @@ void Server::joinChannel(std::string channelName, std::string key, int clientSoc
 		{
 			channel_->addClient(_client);
 			_client.addChannel(*channel_);	
-			res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + "127.0.0.1"+ " JOIN " + channelName + "\r\n";
+			res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + this->ipAddresses.at(clientSocket) + " JOIN " + channelName + "\r\n";
 			channel_->broadcastToMembers(res, -1);
 			res = ":" + _client.getNickname() + " 353 " + _client.getNickname() + " = " + channelName + " :" + channel_->getMembers() + "\r\n";
 			channel_->broadcastToMembers(res, -1);
@@ -93,8 +93,13 @@ void Server::joinChannel(std::string channelName, std::string key, int clientSoc
 		channel->addClient(_client);
 		_client.addChannel(*channel);
 		channel->addOperator(_client);
+		if (key.size() != 0)
+		{
+			channel->setPass(key);
+			channel->setProtected(true);
+		}
 		channels->push_back(channel);
-		res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + "127.0.0.1"+ " JOIN " + channelName + "\r\n";
+		res = ":" + _client.getNickname() + "!" + _client.getUsername() + "@" + this->ipAddresses.at(clientSocket) + " JOIN " + channelName + "\r\n";
 		psend(clientSocket, res.c_str(), res.size(), 0);
 		res = ":" + _client.getNickname() + " MODE " + channelName + " +o " + _client.getNickname() + "\r\n";
 		psend(clientSocket, res.c_str(), res.size(), 0);
@@ -120,12 +125,12 @@ void Server:: joinCmd(std::vector<std::string> cmd,int clientSocket, Client &_cl
 			size_t i = 0;
 			while (i < parsedChannels.size())
 			{
-				if (cmd.size() >= 3 && keys.size() > i)
+				if (i == 0 && cmd.size() >= 3 && keys.size() == 0)
+					joinChannel(parsedChannels[i], cmd[2], clientSocket,_client);
+				else if (cmd.size() >= 3 && keys.size() > i)
 					joinChannel(parsedChannels[i], keys[i], clientSocket,_client);
 				else
-				{
 					joinChannel(parsedChannels[i], "", clientSocket,_client);
-				}
 				i++;
 			}
 		}

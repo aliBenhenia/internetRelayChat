@@ -48,6 +48,7 @@ class Channel {
 		void										removeClient			( Client& client );
 		void										removeClient			( NAME nickname );
 		void										removeOperator			( NAME nickname );
+		void										removeInvited			( NAME nickname );
 
 		bool										hasClient				( int clientSocket ) const;
 		bool										hasClient				( NAME nickname ) const;

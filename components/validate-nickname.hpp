@@ -19,12 +19,13 @@ inline int	validateNickname(const std::string nickname) {
 
 inline int	validateFullname(const std::string fullname) {
 	int spaceCount = 0;
-	if (fullname.empty() || fullname.size() > 10)
+
+	if (fullname.size() > 50 || !isalpha(fullname[0]))
 		return false;
 	for (size_t i = 0; i < fullname.size(); i++) {
 		if (fullname[i] == ' ')
 			spaceCount++;
-		if (!isalpha(fullname[i]) || spaceCount > 1)
+		else if (!isalpha(fullname[i]) || spaceCount > 1)
 			return false;
 	}
 	return true;

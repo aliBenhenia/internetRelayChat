@@ -26,7 +26,6 @@ void Server::kickClient(Channel *channel_, std::string NickName, int clientSocke
 
 	if (!channel_->hasClient(NickName))
 	{
-		// std::string msg = ":ft_irc 442 " + _client.getNickname() + " " + NickName + " :it is not on that channel" + "\r\n";
 		std::string msg = ":ft_irc 441 " + _client.getNickname() + " " + NickName + " " + channel_->getName() + " :They aren't on that channel" + "\r\n";
 		psend(clientSocket, msg.c_str(), msg.size(), 0);
 		return;
@@ -41,6 +40,7 @@ void Server::kickClient(Channel *channel_, std::string NickName, int clientSocke
 	channel_->broadcastToMembers(res, -1);
 	channel_->removeClient(NickName);
 	channel_->removeOperator(NickName);
+	channel_->removeInvited(NickName);
 	removeChannelInClient(channel_->getName(), NickName);
 }
 

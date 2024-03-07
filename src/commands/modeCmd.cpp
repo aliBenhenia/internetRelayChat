@@ -138,7 +138,6 @@ static void keyMode(char modeType , std::string pass ,Channel *channel_,int clie
 
 void Server:: modeCmd(std::vector<std::string> cmd, int clientSocket, Client &_client)
 {
-	int			i = 0;
 	std::string	res;
 	char			modeType;
 	std::string	types;
@@ -174,7 +173,7 @@ void Server:: modeCmd(std::vector<std::string> cmd, int clientSocket, Client &_c
 		}
 		types = cmd.at(2).substr(1);
 		int paramIndex = 3;
-		while (types[i] && i < (int)types.size())
+		for (int i = 0; types[i] && i < (int)types.size(); i++)
 		{
 			if (types[i] == 'i')
 				inviteMode(modeType ,channel_, cmd, _client);
@@ -182,30 +181,30 @@ void Server:: modeCmd(std::vector<std::string> cmd, int clientSocket, Client &_c
 				topicMode(modeType ,channel_, cmd, _client);
 			else if (types[i] == 'o' && modeType == '+')
 			{
-				if (cmd.size() < (size_t)paramIndex)
+				if (cmd.size() <= (size_t)paramIndex)
 				{
 					notEnoughParamsErr(clientSocket, _client.getNickname());
-					return;
+					continue ;
 				}
 				operatorMode(modeType, cmd[paramIndex] ,channel_, clientSocket, cmd, _client);
 				paramIndex++;
 			}
 			else if (types[i] == 'o' && modeType == '-')
 			{
-				if (cmd.size() < (size_t)paramIndex)
+				if (cmd.size() <= (size_t)paramIndex)
 				{
 					notEnoughParamsErr(clientSocket, _client.getNickname());
-					return;
+					continue ;
 				}
 				operatorMode(modeType, cmd[paramIndex] ,channel_, clientSocket, cmd, _client);
 				paramIndex++;
 			}
 			else if (types[i] == 'l'  && modeType == '+')
 			{
-				if (cmd.size() < (size_t)paramIndex)
+				if (cmd.size() <= (size_t)paramIndex)
 				{
 					notEnoughParamsErr(clientSocket, _client.getNickname());
-					return;
+					continue ;
 				}
 				limitMode(modeType, cmd[paramIndex] ,channel_, clientSocket, cmd, _client);
 				paramIndex++;
@@ -217,12 +216,11 @@ void Server:: modeCmd(std::vector<std::string> cmd, int clientSocket, Client &_c
 			}
 			else if (types[i] == 'k' && modeType == '+')
 			{
-				if (cmd.size() < (size_t)paramIndex)
+				if (cmd.size() <= (size_t)paramIndex)
 				{
 					notEnoughParamsErr(clientSocket, _client.getNickname());
-					return;
+					continue ;
 				}
-				// std::cout << Yellow << "key is: |" << cmd[paramIndex] << "|" << Clear << std::endl; 
 				keyMode(modeType, cmd[paramIndex] ,channel_, clientSocket, cmd, _client);
 				paramIndex++;
 			}
@@ -233,7 +231,6 @@ void Server:: modeCmd(std::vector<std::string> cmd, int clientSocket, Client &_c
 			}
 			else
 				unkownCmd(clientSocket ,_client.getNickname(), cmd, types[i]);
-			i++;
 		}
 	}
 }
